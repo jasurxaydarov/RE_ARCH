@@ -25,14 +25,3 @@ type TodoRepoI interface{
 		
 }
 
-
-//CreateUser(ctx context.Context, user modles.User) error
-// DeleteUserByName(ctx context.Context, user_name string) error
-// GetUserByName(ctx context.Context, user_name string) (*modles.User, error)
-// GetUsers(ctx context.Context, limit int, page int) (*[]modles.User, error)
-// UpdateUser(ctx context.Context, user modles.User, user_name string) error
-
-// GetUsers(ctx context.Context,limit int,page int)(*[]modles.User,error)
-// GetUserByName(ctx context.Context, user_name string)(*modles.User,error)
-// UpdateUser(ctx context.Context,users modles.User,user_name string)error
-// DeleteUserByname(ctx context.Context,user_name string)error
