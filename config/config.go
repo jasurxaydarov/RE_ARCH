@@ -16,7 +16,7 @@ func NEwConfig()Config{
 	cfg.DbPassword = "1001"
 	cfg.DbHost = "localhost"
 	cfg.DbPort = 5432
-	cfg.DbName = "postgres"
+	cfg.DbName = "arch"
 
 	return cfg
 }

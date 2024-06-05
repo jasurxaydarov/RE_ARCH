@@ -5,16 +5,15 @@ import (
 	"arch/repoi"
 	"context"
 	"log"
-
 	"github.com/jackc/pgx/v5"
 )
 
 type UserRepo struct {
 
-	conn pgx.Conn
+	conn *pgx.Conn
 }
 
-func NewUserRepo(conn pgx.Conn)repoi.UserRepoI{
+func NewUserRepo(conn *pgx.Conn)repoi.UserRepoI{
 
 	return &UserRepo{
 			conn: conn,
@@ -27,23 +26,31 @@ func(u *UserRepo) CreateUser(ctx context.Context, user modles.User) error{
 
 	query:=
 		`INSERT INTO
-			users(
+			Users(
+				user_id,
 				user_name,
 				gmail,
-				age
+				age,
+				password
 			)VALUES(
 				$1,
 				$2,
-				$3
+				$3,
+				$4,
+				$5
 			)
 			`
+			log.Println(" CreateUser")
 	_, err := u.conn.Exec(
 		ctx,
 		query,
+		user.User_id,
 		user.User_name,
 		user.Gmail,
 		user.Age,
+		user.Password,
 	)
+	log.Println(" CreateUsereeeeeeeeeeeee")
 
 	if err!=nil {
 		
@@ -61,7 +68,7 @@ func(u *UserRepo) GetUsers(ctx context.Context, limit int, page int) (*[]modles.
 		SELECT 
 			*
 		FROM
-			users
+			Users
 		LIMIT 
 			$1
 		OFFSET
@@ -84,7 +91,13 @@ func(u *UserRepo) GetUsers(ctx context.Context, limit int, page int) (*[]modles.
 
 	for rows.Next() {
 
-		rows.Scan(&user.User_id,&user.User_name,&user.Gmail,&user.Age)
+		rows.Scan(
+			&user.User_id,
+			&user.User_name,
+			&user.Gmail,
+			&user.Age,
+			&user.Password,
+		)
 
 		users = append(users, user)
 
@@ -95,7 +108,7 @@ func(u *UserRepo) GetUsers(ctx context.Context, limit int, page int) (*[]modles.
 	return &users,nil
 }
 
-func(u *UserRepo) GetUserById(ctx context.Context, user_id int) (*modles.User, error){
+func(u *UserRepo) GetUserByName(ctx context.Context, user_name string) (*modles.User, error){
 
 	query:=`
 		SELECT 
@@ -103,20 +116,25 @@ func(u *UserRepo) GetUserById(ctx context.Context, user_id int) (*modles.User, e
 		FROM
 			users
 		WHERE 
-			user_id=$1
+			user_name=$1
 		`
 	var user modles.User
 
-	err:=u.conn.QueryRow(ctx,query,user_id).Scan(
+	err:=u.conn.QueryRow(
+		ctx,
+		query,
+		user_name,
+		).Scan(
 		&user.User_id,
 		&user.User_name,
 		&user.Gmail,
 		&user.Age,
+		&user.Password,
 	)
 	
 	if err!=nil {
 		
-		log.Println("error on GetUserById", err)
+		log.Println("error on GetUserByUserNAme", err)
 
 		return nil,err
 	}
@@ -124,7 +142,7 @@ func(u *UserRepo) GetUserById(ctx context.Context, user_id int) (*modles.User, e
 	return &user,nil
 }
 
-func(u *UserRepo) UpdateUser(ctx context.Context, user modles.User) error{
+func(u *UserRepo) UpdateUser(ctx context.Context, user modles.User,user_name string) error{
 
 	query:=`
 		UPDATE 
@@ -132,13 +150,25 @@ func(u *UserRepo) UpdateUser(ctx context.Context, user modles.User) error{
 		SET
 			user_name=$1,
 			gmail=$2,
-			age=$3
+			age=$3,
+			password=$4
+		WHERE 
+			user_name=$5
+			
 	`
-	_,err :=u.conn.Exec(ctx,query,user.User_name,user.Gmail,user.Age)
+	_,err :=u.conn.Exec(
+		ctx,
+		query,
+		user.User_name,
+		user.Gmail,
+		user.Age,
+		user.Password,
+		user_name,
+	)
 
 	if err!=nil {
 		
-		log.Println("error on UpdateUser", err)
+		log.Println("error on UpdateUser inner", err)
 
 		return err
 	}
@@ -146,23 +176,30 @@ func(u *UserRepo) UpdateUser(ctx context.Context, user modles.User) error{
 	return nil
 }
 
-func(u *UserRepo) DeleteUserById(ctx context.Context, user_id int) error{
+func(u *UserRepo) DeleteUserByName(ctx context.Context, user_name string) error{
 
 	query:=`
-		DELETE 
+		DELETE  FROM
 			users
 		WHERE
-			user_id=$1
+			user_name=$1
 	`
 
-	_,err:=u.conn.Exec(ctx,query,user_id)
+	_,err:=u.conn.Exec(
+		ctx,
+		query,
+		user_name,
+	)
 
 	if err!=nil {
 		
-		log.Println("error on DeleteUserById ", err)
+		log.Println("error on DeleteUserByUserName ", err)
 
 		return err
 	}
 	
 	return nil
 }
+
+
+
